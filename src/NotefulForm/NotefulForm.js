@@ -32,7 +32,6 @@ class NotefulForm extends Component {
           />
         </div>
       </form>
-  
     )
   }
 }

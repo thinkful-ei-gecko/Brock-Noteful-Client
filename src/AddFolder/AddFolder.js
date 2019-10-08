@@ -1,44 +1,66 @@
 import React, { Component } from  'react';
-import PropTypes from 'prop-types';
-import ApiContext from '../ApiContext';
 import config from '../config';
-import NotefulForm from '../NotefulForm/NotefulForm';
+import ApiContext from '../ApiContext';
 
 class AddFolder extends Component {
+    static contextType = ApiContext;
 
-    handleSubmit = (note, callback) => {
-        this.setState({error: null})
-        fetch(config.API_ENDPOINT, {
+    state = {
+        name: '',
+    }
+
+    handleChangeFolderName = (e) => {
+        this.setState({ name: e.target.value});
+    }
+
+    handleSubmit = (e) => {
+        e.preventDefault()
+        const newFolder = {
+            name: this.state.name
+        }
+        const url = `${config.API_ENDPOINT}/folders`;
+        const params = {
             method: 'POST',
-            body: JSON.stringify(note),
+            body: JSON.stringify(newFolder),
             headers: {
                 'content-type': 'application/json'
             }
-        })
+        }
+        console.log(url, params);
+        fetch(url, params)
         .then(res => {
             if (!res.ok)
             return res.json().then(error => Promise.reject(error))
-            return res.json
+            return;
         })
-        .then(data => {
-            callback(data)
-            this.context.addNote(data)
-            this.props.history.push('/')
+        .then(() => {
+            this.context.addFolder(newFolder)
+            this.props.history.goBack();
         })
         .catch(error => {
             console.error(error)
             this.setState({ error })
         })
     }
-    
+
     render() {
         return (
-            <section className='AddFolder'>
-                <h2>Add Folder</h2>
-                <NotefulForm 
+            <section className='AddFolderForm'>
+                <form 
                 onSubmit={this.handleSubmit}
-                />
+                >
+                <label htmlFor="addfoldername" className="add-folder-label"> Add Folder</label>
+                    <input 
+                    type="text" 
+                    id="addfoldername" 
+                    name="addfoldername" 
+                    onChange={this.handleChangeFolderName}
+                    >
+                    </input>
+                <button type="submit" className="button">Add Folder</button>
+                </form>
             </section>
+
         );
     }
 }
