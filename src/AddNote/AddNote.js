@@ -6,29 +6,39 @@ class AddNote extends Component {
     static contextType = ApiContext;
 
     state = {
-        name: '',
-        content: '',
-        folderid: 1
-    }
+        error: null,
+        name: {
+          value: '',
+          touched: false,
+        },
+        content: {
+          value: '',
+          touched: false,
+        },
+        folderid: {
+          value: null,
+          touched: false,
+        },
+      };
 
     handleChangeNoteName = (e) => {
-        this.setState({ name: e.target.value});
+        this.setState({ name: { value: e.target.value, touched: true}});
     }
 
     handleChangeNoteContent = (e) => {
-        this.setState({ content: e.target.value});
+        this.setState({ content: { value: e.target.value, touched: true}});
     }
 
     handleChangeNoteFolder = (e) => {
-        this.setState({ folderid: Number(e.target.value)});
+        this.setState({ folderid: { value: Number(e.target.value), touched: true } });
     }
 
     handleSubmit = (e) => {
         e.preventDefault()
         const newNote = {
-            name: this.state.name,
-            content: this.state.content,
-            folderid: this.state.folderid,
+            name: this.state.name.value,
+            content: this.state.content.value,
+            folderid: this.state.folderid.value,
         };
         const params = {
             method: 'POST',
@@ -48,12 +58,34 @@ class AddNote extends Component {
             this.props.history.goBack();
         })
         .catch(error => {
-            console.error(error)
-            this.setState({ error })
+            console.error({ error })
         })
     }
 
+    validateName() {
+        const name = this.state.name.value.trim();
+        if (name.length === 0) {
+          return 'Name is required';
+        }
+      }
+    
+      validateContent() {
+        const content = this.state.content.value.trim();
+        if (content.length === 0) {
+          return 'Content is required';
+        }
+      }
+    
+      validateFolderId() {
+        const folder = this.state.folderid.value;
+        if (!folder) {
+          return 'Must specify an existing folder';
+        }
+      }
+
     render() {
+        const { error } = this.state;
+        const { folders = [] } = this.context;
         return (
             <section className='AddnoteForm'>
                 <form 
@@ -62,18 +94,33 @@ class AddNote extends Component {
                 <h2>Add Note</h2>
                 <label htmlFor="addnotename" className="add-note-label">Note Name</label>
                     <input type="text" id="addnotename" name="addnotename" 
-                    onChange={this.handleChangeNoteName}
-                    /><br/><br/>
-                    <label htmlFor="folderid">Folder ID</label><br/>
-                    <input name="folderid" id="folderid" onChange={this.handleChangeNoteFolder} /><br/><br/>
-
-                    <label htmlFor="noteContent">Content</label><br/>
+                    onChange={this.handleChangeNoteName}/>
+                    {this.state.name.touched && (
+                        <div className="error">{this.validateName()}</div>
+                    )}<br/><br/>
+                <label htmlFor="folderid">Folder ID</label><br/>
+                    <select name="folderid" id="folderid" onChange={this.handleChangeNoteFolder}>
+                        <option value={''}>Select Folder</option>
+                        {folders.map((folder, index) => {
+                        return (
+                        <option value={folder.id} key={index}>
+                            {folder.name}
+                        </option>
+                        );
+                        })}
+                    </select><br/><br/>
+                    {this.state.folderid.touched && (
+                        <div className="error">{this.validateFolderId()}</div>
+                    )}
+                <label htmlFor="noteContent">Content</label><br/>
                     <textarea
                         name="noteContent"
                         id="noteContent"
-                        onChange={this.handleChangeNoteContent}/><br/><br/>
-
-                <button type="submit" className="button">Add note</button>
+                        onChange={this.handleChangeNoteContent}/>
+                    {this.state.content.touched && (
+                        <div className="error">{this.validateContent()}</div>
+                    )}<br/><br/>
+                <button type="submit" disabled={ this.validateName() || this.validateFolderId() || this.validateContent()} className="button">Add note</button>
                 </form>
             </section>
 
