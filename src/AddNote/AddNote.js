@@ -1,5 +1,4 @@
 import React, { Component } from  'react';
-import PropTypes from 'prop-types';
 import ApiContext from '../ApiContext';
 import config from '../config';
 
@@ -9,7 +8,7 @@ class AddNote extends Component {
     state = {
         name: '',
         content: '',
-        folderId: 1
+        folderid: 1
     }
 
     handleChangeNoteName = (e) => {
@@ -21,7 +20,7 @@ class AddNote extends Component {
     }
 
     handleChangeNoteFolder = (e) => {
-        this.setState({ folderId: Number(e.target.value)});
+        this.setState({ folderid: Number(e.target.value)});
     }
 
     handleSubmit = (e) => {
@@ -29,9 +28,8 @@ class AddNote extends Component {
         const newNote = {
             name: this.state.name,
             content: this.state.content,
-            folderId: this.state.folderId,
+            folderid: this.state.folderid,
         };
-        const url = `${config.API_ENDPOINT}/notes`;
         const params = {
             method: 'POST',
             body: JSON.stringify(newNote),
@@ -39,15 +37,14 @@ class AddNote extends Component {
                 'content-type': 'application/json'
             }
         }
-        console.log(url, params);
-        fetch(url, params)
+        fetch(`${config.API_ENDPOINT}/notes`, params)
         .then(res => {
             if (!res.ok)
             return res.json().then(error => Promise.reject(error))
             return;
         })
         .then(() => {
-            this.context.addNote(newNote)
+            this.context.AddNote(newNote)
             this.props.history.goBack();
         })
         .catch(error => {

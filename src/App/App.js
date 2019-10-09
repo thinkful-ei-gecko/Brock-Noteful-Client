@@ -55,7 +55,7 @@ class App extends Component {
             })
     }
 
-    handleAddNote = noteId => {
+    handleAddNote = (note) => {
         fetch(`${config.API_ENDPOINT}/notes`)
             .then((res) => {
                 if (!res.ok) return res.json().then((e) => Promise.reject(e))
@@ -81,7 +81,7 @@ class App extends Component {
         this.setState({
             notes: [ ...this.state.notes, note ],
         })
-    }
+    };
 
     renderNavRoutes() {
         return (
